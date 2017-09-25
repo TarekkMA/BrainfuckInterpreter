@@ -8,49 +8,86 @@ import java.util.List;
  */
 
 public class BrainfuckCompiler {
+
+  public interface InterpreterEventsListener {
+    void onOutput(char output);
+    void onRequestInput();
+    void onFinished();
+  }
+
   private List<Integer> memory = new ArrayList<>();
   private char[] tokens;
   private String result = "";
+  private int curruntMemPos;
+  private int savedPos;
+  private String code;
+  private InterpreterEventsListener listener;
 
+  public BrainfuckCompiler(String code, InterpreterEventsListener listener) {
+    this.code = code;
+    this.listener = listener;
+  }
 
-  public void compile(String code){
+  public void compile(){
     result = "";
     memory = new ArrayList<>();
-    int curruntPos = 0;
+    curruntMemPos = 0;
     tokens = code.toCharArray();
-    for (int i = 0;i<tokens.length;i++) {
+    compile(0);
+  }
+
+  public void resume(){
+    compile(savedPos);
+  }
+
+  public void input(char a){
+    setMemSolt(curruntMemPos,a);
+  }
+
+  private void compile(int pos){
+    for (int i = pos;i<tokens.length;i++) {
       switch (tokens[i]){
         case '+':
-          incMem(curruntPos);
+          incMem(curruntMemPos);
           break;
         case '-':
-          decMem(curruntPos);
+          decMem(curruntMemPos);
           break;
         case '>':
-          curruntPos++;
+          curruntMemPos++;
           break;
         case '<':
-          curruntPos--;
+          curruntMemPos--;
           break;
         case '.':
-          printMem(curruntPos);
+          printMem(curruntMemPos);
           break;
         case '[':
-          if(memory.get(curruntPos)==0)
+          if(memory.get(curruntMemPos)==0)
             i = findClosingLoop(i);
           break;
         case ']':
-          if(memory.get(curruntPos)!=0)
+          if(memory.get(curruntMemPos)!=0)
             i = findOpeningLoop(i);
           break;
+        case ',':
+          savedPos = i+1;
+          listener.onRequestInput();
+          return;
       }
     }
+    listener.onFinished();
   }
 
 
   private void addMemSolts(int pos){
     while(pos >= memory.size())
       memory.add(0);
+  }
+
+  private void setMemSolt(int pos,int val){
+    addMemSolts(pos);
+    memory.set(pos,val);
   }
 
   private void incMem(int pos){
@@ -66,6 +103,7 @@ public class BrainfuckCompiler {
   private void printMem(int pos) {
     addMemSolts(pos);
     result += (char) memory.get(pos).intValue();
+    listener.onOutput((char) memory.get(pos).intValue());
   }
 
   private int findClosingLoop(int pos){

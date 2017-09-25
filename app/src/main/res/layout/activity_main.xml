@@ -17,11 +17,38 @@
       android:gravity="start"
       />
 
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center"
+      android:id="@+id/input_layout"
+      android:visibility="gone"
+      tools:visibility="visible"
+      >
+    <EditText
+        android:id="@+id/input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:lines="1"
+        android:hint="Input"
+        />
+    <Button
+        android:id="@+id/input_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Submit"
+        android:textAllCaps="false"
+        android:onClick="onInputSubmit"
+        />
+  </LinearLayout>
+
   <TextView
       android:id="@+id/result_view"
       android:layout_width="match_parent"
       android:layout_height="0dp"
       android:layout_weight="1"
+      android:textIsSelectable="true"
       />
 
   <Button
